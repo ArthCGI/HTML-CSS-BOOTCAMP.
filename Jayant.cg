@@ -1,0 +1,60 @@
+import os
+import subprocess
+import shlex
+import getpass
+import hashlib
+import sys
+
+# Securely obtain the hashed password from an environment variable
+# The environment variable should contain a SHA-256 hash of the actual password.
+HASHED_PASSWORD = os.getenv("APP_PASSWORD_HASH", "")
+
+WHITELIST = {
+    "echo": ["echo"],
+    "date": ["date"],
+    "whoami": ["whoami"]
+}
+
+def _authenticate(username: str, password: str) -> bool:
+    """Check credentials against a hard‑coded admin user and hashed password."""
+    return username == "admin" and hashlib.sha256(password.encode()).hexdigest() == HASHED_PASSWORD
+
+def _run_safe_command(command: str):
+    """Execute only whitelisted commands safely."""
+    parts = shlex.split(command)
+    if not parts:
+        print("No command entered.")
+        return
+    base_cmd = parts[0]
+    if base_cmd not in WHITELIST:
+        print(f"Command '{base_cmd}' is not allowed.")
+        return
+    args = WHITELIST[base_cmd] + parts[1:]
+    try:
+        result = subprocess.run(args, capture_output=True, text=True, check=False)
+        sys.stdout.write(result.stdout)
+        if result.stderr:
+            sys.stderr.write(result.stderr)
+    except Exception as e:
+        print(f"Error executing command: {e}")
+
+def main():
+    # Efficient data creation and sum calculation
+    result = sum(range(10000))
+    print("Sum:", result)
+
+    # Authentication
+    user = input("Username: ")
+    pwd = getpass.getpass("Password: ")
+    if _authenticate(user, pwd):
+        print("Logged in")
+    else:
+        print("Access denied")
+        return
+
+    # Command execution
+    cmd = input("Enter command: ")
+    _run_safe_command(cmd)
+
+if __name__ == "__main__":
+    main()
