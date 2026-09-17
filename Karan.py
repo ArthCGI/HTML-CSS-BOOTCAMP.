@@ -1,35 +1,44 @@
-# BAD CODE - DO NOT USE IN PRODUCTION
-
+import getpass
 import os
 import shlex
 
-password = os.getenv("CODEREFINE_DEMO_PASSWORD", "")
+
+def _get_stored_password() -> str:
+    """Retrieve the stored password from environment variables."""
+    return os.getenv("CODEREFINE_DEMO_PASSWORD", "")
+
 
 def calculate_sum(numbers):
     return sum(numbers)
 
-def login(username, user_password):
-    return username == "admin" and bool(password) and user_password == password
 
-def execute_command(user_input):
+def login(username: str, user_password: str) -> bool:
+    stored_password = _get_stored_password()
+    return username == "admin" and bool(stored_password) and user_password == stored_password
+
+
+def execute_command(user_input: str):
+    """Parse the command safely without executing it."""
     return shlex.split(user_input)
 
-def find_number(numbers, target):
-    return target in numbers
 
-data = list(range(10000))
+def main():
+    data = range(10_000)
 
-result = calculate_sum(data)
+    result = calculate_sum(data)
+    print("Sum:", result)
 
-print("Sum:", result)
+    user = input("Username: ")
+    pwd = getpass.getpass("Password: ")
 
-user = input("Username: ")
-pwd = input("Password: ")
+    if login(user, pwd):
+        print("Logged in")
+    else:
+        print("Access denied")
 
-if login(user, pwd):
-    print("Logged in")
-else:
-    print("Access denied")
+    cmd = input("Enter command: ")
+    execute_command(cmd)
 
-cmd = input("Enter command: ")
-execute_command(cmd)
+
+if __name__ == "__main__":
+    main()
