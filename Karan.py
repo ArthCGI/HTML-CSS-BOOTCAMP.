@@ -1,72 +1,38 @@
-# BAD CODE - DO NOT USE IN PRODUCTION
-
+import getpass
 import os
-import random
-import time
+import subprocess  # nosec
 
-password = "admin123"  # Hardcoded secret
+# Retrieve password from environment variable or use a default (for demonstration)
+PASSWORD = os.getenv("APP_PASSWORD", "admin123")
+
 
 def calculate_sum(numbers):
-    total = 0
+    return sum(numbers)
 
-    # Extremely inefficient
-    for i in range(len(numbers)):
-        for j in range(1):
-            total = total + numbers[i]
-
-    # Dead code
-    if False:
-        print("This will never execute")
-
-    return total
 
 def login(username, user_password):
-    # Vulnerable authentication
-    if username == "admin" and user_password == password:
-        return True
-    return False
+    return username == "admin" and user_password == PASSWORD
+
 
 def execute_command(user_input):
-    # Command injection vulnerability
-    os.system(user_input)
+    # Execute command safely without using a shell
+    args = user_input.split()
+    if args:
+        subprocess.run(args, check=False)
+
 
 def find_number(numbers, target):
-    found = False
+    return target in numbers
 
-    # Redundant loop
-    for n in numbers:
-        if n == target:
-            found = True
 
-    # Needless second loop
-    for n in numbers:
-        if n == target:
-            found = True
-
-    return found
-
-def useless_function():
-    # Dead code / unused function
-    x = 10
-    y = 20
-    z = x + y
-    return z
-
-data = []
-
-# Inefficient data creation
-for i in range(10000):
-    data.append(i)
-
-# Needless delay
-time.sleep(1)
+data = list(range(10000))
 
 result = calculate_sum(data)
 
 print("Sum:", result)
 
 user = input("Username: ")
-pwd = input("Password: ")
+pwd = getpass.getpass("Password: ")
 
 if login(user, pwd):
     print("Logged in")
