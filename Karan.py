@@ -1,77 +1,40 @@
-# BAD CODE - DO NOT USE IN PRODUCTION
-
 import os
-import random
-import time
+import subprocess
 
-password = "admin123"  # Hardcoded secret
+# Retrieve password securely from environment variable
+PASSWORD = os.getenv("APP_PASSWORD", "default_password")
 
 def calculate_sum(numbers):
-    total = 0
-
-    # Extremely inefficient
-    for i in range(len(numbers)):
-        for j in range(1):
-            total = total + numbers[i]
-
-    # Dead code
-    if False:
-        print("This will never execute")
-
-    return total
+    return sum(numbers)
 
 def login(username, user_password):
-    # Vulnerable authentication
-    if username == "admin" and user_password == password:
-        return True
-    return False
+    return username == "admin" and user_password == PASSWORD
 
 def execute_command(user_input):
-    # Command injection vulnerability
-    os.system(user_input)
+    # Define a whitelist of allowed commands
+    allowed_commands = {"echo", "date", "whoami"}
+    parts = user_input.strip().split()
+    if parts and parts[0] in allowed_commands:
+        subprocess.run(parts, check=False, shell=False)
 
 def find_number(numbers, target):
-    found = False
+    return target in numbers
 
-    # Redundant loop
-    for n in numbers:
-        if n == target:
-            found = True
+def main():
+    data = list(range(10000))
+    result = calculate_sum(data)
+    print("Sum:", result)
 
-    # Needless second loop
-    for n in numbers:
-        if n == target:
-            found = True
+    user = input("Username: ")
+    pwd = input("Password: ")
 
-    return found
+    if login(user, pwd):
+        print("Logged in")
+    else:
+        print("Access denied")
 
-def useless_function():
-    # Dead code / unused function
-    x = 10
-    y = 20
-    z = x + y
-    return z
+    cmd = input("Enter command: ")
+    execute_command(cmd)
 
-data = []
-
-# Inefficient data creation
-for i in range(10000):
-    data.append(i)
-
-# Needless delay
-time.sleep(1)
-
-result = calculate_sum(data)
-
-print("Sum:", result)
-
-user = input("Username: ")
-pwd = input("Password: ")
-
-if login(user, pwd):
-    print("Logged in")
-else:
-    print("Access denied")
-
-cmd = input("Enter command: ")
-execute_command(cmd)
+if __name__ == "__main__":
+    main()
